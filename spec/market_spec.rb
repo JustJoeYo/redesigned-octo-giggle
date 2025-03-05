@@ -30,9 +30,17 @@ RSpec.describe Market do
       expect(@market).to be_a(Market)
     end
 
-    it '#attributes' do
-      expect(@market.name).to eq("South Pearl Street Farmers Market")
-      expect(@market.vendors).to eq([@vendor1, @vendor2, @vendor3])
+    describe 'attributes' do
+      it '#name/#vendors' do
+        expect(@market.name).to eq("South Pearl Street Farmers Market")
+        expect(@market.vendors).to eq([@vendor1, @vendor2, @vendor3])
+      end
+      it '#date' do
+        # moved to proper block and gave it room of its own due to the mock
+        allow(Date).to receive(:today).and_return(Date.new(2023, 2, 24)) # Mocks and stubs yoooo
+        market = Market.new("South Pearl Street Farmers Market")
+        expect(market.date).to eq("24/02/2023")
+      end
     end
   end
 
@@ -68,13 +76,8 @@ RSpec.describe Market do
       expect(@market.sorted_item_list).to eq(["Banana Nice Cream", "Peach", "Peach-Raspberry Nice Cream", "Tomato"])
     end
 
-    it '#date' do
-      allow(Date).to receive(:today).and_return(Date.new(2023, 2, 24))
-      market = Market.new("South Pearl Street Farmers Market")
-      expect(market.date).to eq("24/02/2023")
-    end
-
     it '#sell' do
+      # already kinda have stuff in the before block so easily life.
       expect(@market.sell(@item1, 200)).to eq(false)
       expect(@market.sell(@item1, 40)).to eq(true)
       expect(@vendor1.check_stock(@item1)).to eq(0)
