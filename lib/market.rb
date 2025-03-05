@@ -1,12 +1,14 @@
+require 'date' # as the doctor ordered
 # will be asked to record Vendors That Sell later so leaving extra notes for myself (could be moved to describe/it blocks)
 
 class Market
-  attr_reader :name, :vendors
+  attr_reader :name, :vendors, :date
 
   # Initializes a new Market object with a name and an empty array of vendors.
   def initialize(name)
     @name = name
     @vendors = []
+    @date = Date.today.strftime("%d/%m/%Y") # documentation was handy, https://ruby-doc.org/stdlib-2.5.1/libdoc/date/rdoc/Date.html#method-i-strftime
   end
 
   # Adds a vendor to the market's list of vendors.
@@ -68,5 +70,29 @@ class Market
     @vendors.flat_map do |vendor|
       vendor.inventory.keys.map(&:name)
     end.uniq.sort
+  end
+
+  # Attempts to sell an item in a specific quantity.
+  # If the item is not in stock the method returns false.
+  def sell(item, quantity)
+    # If the quantity is greater than the total inventory the method will return false.
+    return false if total_inventory[item][:quantity] < quantity
+
+    # Iterate over each vendor in the @vendors array.
+    @vendors.each do |vendor|
+      # If the vendor has the item in stock.
+      if vendor.inventory[item] >= quantity
+        # Subtract the quantity from the vendor's inventory.
+        vendor.inventory[item] -= quantity
+        # Return true when the item is sold.
+        return true
+      else
+        # If the vendor does not have enough of the item in stock.
+        quantity -= vendor.inventory[item]
+        # Set the vendor's inventory of the item to 0.
+        vendor.inventory[item] = 0
+        # Cover your edge or Megan will break it.
+      end
+    end
   end
 end

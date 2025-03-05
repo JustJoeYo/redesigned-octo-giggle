@@ -1,6 +1,4 @@
-require './lib/market'
-require './lib/vendor'
-require './lib/item'
+require 'spec_helper' # removed redundant imports
 
 RSpec.configure do |config|
   config.formatter = :documentation
@@ -17,7 +15,6 @@ RSpec.describe Market do
     @item3 = Item.new({name: "Peach-Raspberry Nice Cream", price: "$5.30"})
     @item4 = Item.new({name: "Banana Nice Cream", price: "$4.25"})
 
-    # moved here for simplicity and shortening the reusage.
     @vendor1.stock(@item1, 35)
     @vendor1.stock(@item2, 7)
     @vendor2.stock(@item4, 50)
@@ -69,6 +66,19 @@ RSpec.describe Market do
 
     it '#sorted_item_list' do
       expect(@market.sorted_item_list).to eq(["Banana Nice Cream", "Peach", "Peach-Raspberry Nice Cream", "Tomato"])
+    end
+
+    it '#date' do
+      allow(Date).to receive(:today).and_return(Date.new(2023, 2, 24))
+      market = Market.new("South Pearl Street Farmers Market")
+      expect(market.date).to eq("24/02/2023")
+    end
+
+    it '#sell' do
+      expect(@market.sell(@item1, 200)).to eq(false)
+      expect(@market.sell(@item1, 40)).to eq(true)
+      expect(@vendor1.check_stock(@item1)).to eq(0)
+      expect(@vendor3.check_stock(@item1)).to eq(60)
     end
   end
 
